@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard – Instant Finance</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:Inter,Arial,sans-serif;
+  background:linear-gradient(135deg,#f3e5f5,#e1bee7,#f8bbd0);
+}
+.topbar{
+  position:fixed;
+  top:0;left:0;width:100%;
+  background:#7e22ce;
+  color:#fff;
+  padding:10px 14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  z-index:100;
+}
+.topbar button{
+  border:none;
+  background:#db2777;
+  color:#fff;
+  width:44px;height:44px;
+  border-radius:50%;
+  font-size:18px;
+}
+.container{
+  padding:90px 14px 120px;
+}
+.section-title{
+  font-weight:700;
+  color:#4c1d95;
+  margin:12px 0;
+}
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+}
+.card{
+  background:#fff;
+  padding:16px;
+  border-radius:18px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.15);
+  text-align:center;
+}
+.card h2{
+  margin:0;
+  font-size:22px;
+  color:#4c1d95;
+}
+.card p{
+  margin:4px 0;
+  color:#6b7280;
+  font-weight:600;
+}
+
+/* Floating Buttons */
+.floating{
+  position:fixed;
+  right:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.floating button{
+  padding:14px 20px;
+  border-radius:40px;
+  border:none;
+  color:#fff;
+  font-weight:700;
+  box-shadow:0 6px 18px rgba(0,0,0,0.3);
+}
+.btn-update{background:#7c3aed;}
+.btn-loan{background:#0ea5e9;}
+.btn-pay{background:#10b981;}
+
+/* Modal */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+.modal-box{
+  background:#fff;
+  width:100%;
+  max-width:360px;
+  border-radius:18px;
+  padding:16px;
+}
+.modal-box h3{
+  margin-top:0;
+  color:#7c3aed;
+}
+.modal-box input{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+.saveBtn{
+  width:100%;
+  padding:12px;
+  background:#7c3aed;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-weight:700;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <b>Instant Finance – Admin</b>
+  <button onclick="logout()">🔒</button>
+</div>
+
+<div class="container">
+  <div class="section-title">📊 Dashboard Summary</div>
+  <div class="card-grid">
+    <div class="card"><h2 id="totalLoans">0</h2><p>Total Loans</p></div>
+    <div class="card"><h2 id="pendingLoans">0</h2><p>Pending</p></div>
+    <div class="card"><h2 id="approvedLoans">0</h2><p>Approved</p></div>
+    <div class="card"><h2 id="rejectedLoans">0</h2><p>Rejected</p></div>
+  </div>
+</div>
+
+<!-- Floating Buttons -->
+<div class="floating" style="bottom:20px">
+  <button class="btn-pay" onclick="goPayments()">💳 Payments</button>
+  <button class="btn-loan" onclick="goLoans()">💰 Loan Users</button>
+  <button class="btn-update" onclick="openAccount()">✏️ Update Account</button>
+</div>
+
+<!-- Update Account Modal -->
+<div class="modal" id="accountModal">
+  <div class="modal-box">
+    <h3>Pay At This Account</h3>
+    <input id="accName" placeholder="Account Holder Name">
+    <input id="accNo" placeholder="Account Number">
+    <input id="accIfsc" placeholder="IFSC Code">
+    <input id="accUpi" placeholder="UPI ID">
+    <input id="accHelp" placeholder="Helpline Number">
+    <input type="file" id="accQR" accept="image/*">
+    <button class="saveBtn" onclick="saveAccount()">💾 Save</button>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+ apiKey:"AIzaSyCsIYVX3OawpDlFZpKU3KpRsfM7QQoyWyY",
+ authDomain:"onlineservice-9f153.firebaseapp.com",
+ databaseURL:"https://onlineservice-9f153-default-rtdb.firebaseio.com",
+ projectId:"onlineservice-9f153",
+ storageBucket:"onlineservice-9f153.appspot.com",
+ messagingSenderId:"1040271430967",
+ appId:"1:1040271430967:web:6325b056257454943d36b2"
+});
+
+const auth=firebase.auth();
+const db=firebase.database();
+const storage=firebase.storage();
+
+/* ---- Login Check ---- */
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+auth.onAuthStateChanged(user => {
+  if(user){
+    loadSummary(); // keep session active
+  } else {
+    window.location.href = "admin-login.html";
+  }
+});
+
+/* Dashboard Summary */
+function loadSummary(){
+ db.ref("loanUsers").on("value",snap=>{
+  let t=0,p=0,a=0,r=0;
+  Object.values(snap.val()||{}).forEach(v=>{
+    t++;
+    const st=(v.status||"").toLowerCase();
+    if(st==="approved") a++;
+    else if(st==="rejected") r++;
+    else p++;
+  });
+  totalLoans.innerText=t;
+  pendingLoans.innerText=p;
+  approvedLoans.innerText=a;
+  rejectedLoans.innerText=r;
+ });
+}
+
+/* Update Account Modal */
+function openAccount(){
+  // Load existing admin account if exists
+  db.ref("settings/adminAccount").once("value").then(s => {
+    const d = s.val() || {};
+    accName.value = d.name || "";
+    accNo.value = d.account || "";
+    accIfsc.value = d.ifsc || "";
+    accUpi.value = d.upi || "";
+    accHelp.value = d.helpline || "";
+    accountModal.style.display = "flex";
+  });
+}
+
+
+/* Save Updated Account and push to all loanUsers */
+function saveAccount(){
+ const data = {
+  name: accName.value,
+  account: accNo.value,
+  ifsc: accIfsc.value,
+  upi: accUpi.value,
+  helpline: accHelp.value
+ };
+
+ const f = accQR.files[0];
+
+ const saveToDb = (qrUrl) => {
+   if(qrUrl) data.qrUrl = qrUrl;
+
+   // Save admin account
+   db.ref("settings/adminAccount").set(data).then(() => {
+
+     // Update all loanUsers' payAtThisAccount
+     db.ref("loanUsers").once("value").then(snap=>{
+       const users = snap.val() || {};
+       const updates = {};
+       Object.keys(users).forEach(uid=>{
+         updates[uid + "/payAtThisAccount"] = {
+           name: data.name,
+           account: data.account,
+           ifsc: data.ifsc,
+           upi: data.upi,
+           helpline: data.helpline,
+           qrUrl: data.qrUrl || ""
+         };
+       });
+       if(Object.keys(updates).length>0){
+         db.ref("loanUsers").update(updates).then(()=>{
+           alert("✅ Pay Account Updated for All Users");
+           accountModal.style.display="none";
+         });
+       } else {
+         accountModal.style.display="none";
+       }
+     });
+
+   }).catch(err=>alert("❌ Error: "+err.message));
+ };
+
+ if(f){
+   const ref = storage.ref("admin/upi_qr.png");
+   ref.put(f).then(() => {
+     ref.getDownloadURL().then(url => saveToDb(url));
+   });
+ } else {
+   saveToDb();
+ }
+}
+
+/* Navigation */
+function goLoans(){ location.href="admin-application.html"; }
+function goPayments(){ location.href="admin-verify.html"; }
+
+function logout(){
+ auth.signOut().then(()=>{ window.location.href="admin-login.html"; });
+}
+</script>
+
+</body>
+</html>
