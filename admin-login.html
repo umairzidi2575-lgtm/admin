@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login – Instant Finance</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#f3e5f5,#e1bee7,#f8bbd0);
+  min-height:100vh;
+}
+
+/* SECURITY CODE POPUP */
+.code-popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding-top:60px;
+  z-index:9999;
+}
+.code-box{
+  background:#fff;
+  padding:24px;
+  border-radius:18px;
+  width:90%;
+  max-width:320px;
+  text-align:center;
+  box-shadow:0 14px 30px rgba(0,0,0,.25);
+}
+.code-box h3{
+  margin-bottom:15px;
+  background:linear-gradient(90deg,#7c3aed,#db2777);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.code-box input{
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  margin-bottom:12px;
+}
+.code-box button{
+  width:100%;
+  padding:12px;
+  background:linear-gradient(90deg,#7c3aed,#db2777);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-weight:700;
+}
+.code-box button:disabled{
+  background:#ccc;
+}
+
+/* LOGIN BOX */
+.login-box{
+  background:#fff;
+  padding:26px;
+  border-radius:18px;
+  width:90%;
+  max-width:360px;
+  margin:60px auto;
+  text-align:center;
+  display:none;
+  box-shadow:0 14px 30px rgba(0,0,0,.25);
+}
+.login-box h2{
+  margin-bottom:14px;
+  background:linear-gradient(90deg,#7c3aed,#db2777);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.login-box input{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+.login-box button{
+  width:100%;
+  padding:12px;
+  background:linear-gradient(90deg,#7c3aed,#db2777);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-weight:700;
+}
+.error{
+  color:#ef4444;
+  font-size:13px;
+  min-height:18px;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔐 SECURITY CODE -->
+<div class="code-popup" id="codePopup">
+  <div class="code-box">
+    <h3>Security Access Code</h3>
+    <input type="password" id="secureCode" maxlength="10"
+      placeholder="Enter security code"
+      oninput="validateCode()">
+    <button id="codeBtn" onclick="checkCode()" disabled>Continue</button>
+    <div class="error" id="codeError"></div>
+  </div>
+</div>
+
+<!-- 🔑 LOGIN -->
+<div class="login-box" id="loginBox">
+  <h2>Admin Login</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="loginAdmin()">Login</button>
+  <div class="error" id="loginError"></div>
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<script>
+/* ===== CONFIG ===== */
+const SECRET_CODE = "7372874327";
+const allowedAdmins = [
+  "ppatelraj.1998@gmail.com",
+  "ppatelraj.1999@gmail.com"
+];
+
+/* ===== FIREBASE ===== */
+const firebaseConfig = {
+  apiKey:"AIzaSyCsIYVX3OawpDlFZpKU3KpRsfM7QQoyWyY",
+  authDomain:"onlineservice-9f153.firebaseapp.com",
+  projectId:"onlineservice-9f153",
+  storageBucket:"onlineservice-9f153.appspot.com",
+  messagingSenderId:"1040271430967",
+  appId:"1:1040271430967:web:6325b056257454943d36b2"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+/* ===== SECURITY CODE ===== */
+function validateCode(){
+  const input = document.getElementById("secureCode");
+  const btn = document.getElementById("codeBtn");
+  input.value = input.value.replace(/[^a-zA-Z0-9]/g,'');
+  btn.disabled = input.value.length === 0;
+}
+
+function checkCode(){
+  const code = document.getElementById("secureCode").value.trim();
+  if(code === SECRET_CODE){
+    sessionStorage.setItem("codeVerified","yes");
+    document.getElementById("codePopup").style.display="none";
+    document.getElementById("loginBox").style.display="block";
+  }else{
+    document.getElementById("codeError").innerText = "Invalid security code";
+  }
+}
+
+/* ===== LOGIN ===== */
+function loginAdmin(){
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  const errorDiv = document.getElementById("loginError");
+  errorDiv.textContent = "";
+
+  if(!email || !pass){
+    errorDiv.textContent = "Enter email & password";
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(res=>{
+      if(allowedAdmins.includes(res.user.email)){
+        window.location.replace("admin-dashboard.html");
+      }else{
+        auth.signOut();
+        errorDiv.textContent = "Access denied";
+      }
+    })
+    .catch(err=>{
+      if(err.code==="auth/wrong-password" || err.code==="auth/invalid-credential"){
+        errorDiv.textContent = "Invalid email or password";
+      }else{
+        errorDiv.textContent = err.message;
+      }
+    });
+}
+
+/* ===== PAGE LOAD ===== */
+window.onload = function(){
+  const codeOk = sessionStorage.getItem("codeVerified");
+  auth.onAuthStateChanged(user=>{
+    if(user && allowedAdmins.includes(user.email) && codeOk === "yes"){
+      window.location.replace("admin-dashboard.html");
+    }else if(codeOk === "yes"){
+      document.getElementById("codePopup").style.display="none";
+      document.getElementById("loginBox").style.display="block";
+    }else{
+      document.getElementById("codePopup").style.display="flex";
+    }
+  });
+};
+</script>
+
+</body>
+</html>

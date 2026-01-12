@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dhani Finance – Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif;}
+body{background:#f4f6fb;color:#111827;min-height:100vh;padding:20px;}
+h2{margin-bottom:20px;color:#2563eb;}
+.card{background:#fff;padding:20px;border-radius:16px;box-shadow:0 6px 18px rgba(0,0,0,.08);margin-bottom:16px;}
+.card h3{margin-bottom:12px;color:#374151;}
+.card input{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #d1d5db;
+  margin-bottom:12px;
+  font-size:14px;
+  /* Remove arrows from number input */
+  -moz-appearance: textfield; /* Firefox */
+}
+.card input::-webkit-outer-spin-button,
+.card input::-webkit-inner-spin-button {
+  -webkit-appearance: none; /* Chrome/Safari */
+  margin: 0;
+}
+.card button{background:#2563eb;color:#fff;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;transition:0.3s;}
+.card button:hover{background:#1d4ed8;transform:scale(1.05);}
+.notice{margin-bottom:16px;padding:12px;background:#dbeafe;color:#1e40af;border-radius:12px;}
+</style>
+</head>
+<body>
+
+<div class="notice">Admin Panel: Update Charges & Payment Gateway Links</div>
+
+<div class="card">
+  <h2>Set Charges for Users</h2>
+  <h3>Processing Fee</h3>
+  <input type="number" id="processingFee" placeholder="₹ Enter Processing Fee">
+  <h3>Service & TDS</h3>
+  <input type="number" id="serviceTDS" placeholder="₹ Enter Service & TDS Charge">
+  <h3>GST</h3>
+  <input type="number" id="gst" placeholder="₹ Enter GST Charge">
+  <button onclick="saveCharges()">Save Charges</button>
+</div>
+
+<div class="card">
+  <h2>Set Payment Gateway Links</h2>
+  <h3>Processing Fee Gateway Link</h3>
+  <input type="text" id="processingFeeLink" placeholder="Enter URL">
+  <h3>Service & TDS Gateway Link</h3>
+  <input type="text" id="serviceTDSLink" placeholder="Enter URL">
+  <h3>GST Gateway Link</h3>
+  <input type="text" id="gstLink" placeholder="Enter URL">
+  <button onclick="saveGatewayLinks()">Save Gateway Links</button>
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyB-ipqoUdwFYKvSKdBXe0ivw8Ph47IyjfE",
+  authDomain:"incoinpaysliveearning.firebaseapp.com",
+  databaseURL:"https://incoinpaysliveearning-default-rtdb.firebaseio.com",
+  projectId:"incoinpaysliveearning"
+});
+const db=firebase.database();
+
+// Load existing charges and links
+function loadAdminData(){
+  db.ref("adminCharges").once("value").then(snap=>{
+    const data = snap.val() || {};
+    document.getElementById("processingFee").value = data.processingFee || 0;
+    document.getElementById("serviceTDS").value = data.serviceTDS || 0;
+    document.getElementById("gst").value = data.gst || 0;
+    document.getElementById("processingFeeLink").value = data.processingFeeLink || "";
+    document.getElementById("serviceTDSLink").value = data.serviceTDSLink || "";
+    document.getElementById("gstLink").value = data.gstLink || "";
+  });
+}
+
+// Save charges to Firebase
+function saveCharges(){
+  const processingFee = parseFloat(document.getElementById("processingFee").value) || 0;
+  const serviceTDS = parseFloat(document.getElementById("serviceTDS").value) || 0;
+  const gst = parseFloat(document.getElementById("gst").value) || 0;
+
+  db.ref("adminCharges").update({
+    processingFee,
+    serviceTDS,
+    gst
+  }).then(()=>{
+    alert("Charges updated successfully!");
+  });
+}
+
+// Save gateway links to Firebase
+function saveGatewayLinks(){
+  const processingFeeLink = document.getElementById("processingFeeLink").value.trim();
+  const serviceTDSLink = document.getElementById("serviceTDSLink").value.trim();
+  const gstLink = document.getElementById("gstLink").value.trim();
+
+  db.ref("adminCharges").update({
+    processingFeeLink,
+    serviceTDSLink,
+    gstLink
+  }).then(()=>{
+    alert("Payment gateway links updated successfully!");
+  });
+}
+
+loadAdminData();
+</script>
+
+</body>
+</html>
